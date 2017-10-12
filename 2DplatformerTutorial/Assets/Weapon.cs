@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class Weapon : MonoBehaviour {
 
@@ -7,6 +8,7 @@ public class Weapon : MonoBehaviour {
 
     public LayerMask whatToHit; //Tells us what we want to hit //raycast is a layer of objects which we want to hit
     public Transform BulletTrailPrefab;
+    public Transform MuzzleFlashPrefab;
 
     float timeToSpawnEffect = 0f;
     public float effectSpawnRate = 10f;
@@ -17,7 +19,7 @@ public class Weapon : MonoBehaviour {
     // Use this for initialization
     void Awake ()
     {
-        firePoint = transform.FindChild("FirePoint");
+        firePoint = transform.Find("FirePoint");
         if(firePoint == null)
         {
             Debug.LogError("No fire point? WhaAAAAAAAT");
@@ -53,6 +55,7 @@ public class Weapon : MonoBehaviour {
         RaycastHit2D hit = Physics2D.Raycast(firePointPos, mousePos - firePointPos, 100, whatToHit); //distance is the parameter of the shooting
         if(Time.time >= timeToSpawnEffect)
         {
+            //StartCoroutine("Effect");   //============IENUMERATOR
             Effect();
             timeToSpawnEffect = Time.time + 1 / effectSpawnRate;
         }
@@ -64,8 +67,20 @@ public class Weapon : MonoBehaviour {
         }
 
     }
+    //IEnumerator Effect()
     void Effect()
     {
         Instantiate(BulletTrailPrefab, firePoint.position, firePoint.rotation); //What to spawn, position of spawn
+
+        //Create instant in which we want to store in a variable so different instances can be randomized and different each time
+        Transform clone = (Transform)Instantiate(MuzzleFlashPrefab, firePoint.position, firePoint.rotation); //Want to change things on muzzle flash after instantiated
+        clone.parent = firePoint; //parent the clone to a firepoint
+        float size = Random.Range(0.6f, 0.9f);
+        clone.localScale = new Vector3(size, size, size);
+        //Display for 1 single frame = yield return 0;
+        //yield return 0; //Requires function to be an IEnumerator //Waits a single frame
+        //Destroy(clone);
+        Destroy(clone.gameObject, 0.02f); //Must destroy the actual game object
+        //Display for multiple frames = 
     }
 }
