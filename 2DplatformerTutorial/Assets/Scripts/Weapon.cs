@@ -48,39 +48,29 @@ public class Weapon : MonoBehaviour {
 
     void Shoot()
     {
-        //Debug.Log("Test");
-        Vector2 mousePos = new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, 
-                                       Camera.main.ScreenToWorldPoint(Input.mousePosition).y);
-        Vector2 firePointPos = new Vector2(firePoint.position.x, firePoint.position.y);
-        RaycastHit2D hit = Physics2D.Raycast(firePointPos, mousePos - firePointPos, 100, whatToHit); //distance is the parameter of the shooting
-        if(Time.time >= timeToSpawnEffect)
+        Vector2 mousePosition = new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y);
+        Vector2 firePointPosition = new Vector2(firePoint.position.x, firePoint.position.y);
+        RaycastHit2D hit = Physics2D.Raycast(firePointPosition, mousePosition - firePointPosition, 100, whatToHit);
+        if (Time.time >= timeToSpawnEffect)
         {
-            //StartCoroutine("Effect");   //============IENUMERATOR
             Effect();
             timeToSpawnEffect = Time.time + 1 / effectSpawnRate;
         }
-        Debug.DrawLine(firePointPos, (mousePos - firePointPos) * 100, Color.cyan, 0.1f, true);
+        Debug.DrawLine(firePointPosition, (mousePosition - firePointPosition) * 100, Color.cyan);
         if (hit.collider != null)
         {
-            Debug.DrawLine(firePointPos, hit.point, Color.red, 0.1f, true);
-            Debug.Log("We hit" + hit.collider.name + " and did " + Damage + " damage.");
+            Debug.DrawLine(firePointPosition, hit.point, Color.red);
+            Debug.Log("We hit " + hit.collider.name + " and did " + Damage + " damage.");
         }
-
     }
     //IEnumerator Effect()
     void Effect()
     {
-        Instantiate(BulletTrailPrefab, firePoint.position, firePoint.rotation); //What to spawn, position of spawn
-
-        //Create instant in which we want to store in a variable so different instances can be randomized and different each time
-        Transform clone = (Transform)Instantiate(MuzzleFlashPrefab, firePoint.position, firePoint.rotation); //Want to change things on muzzle flash after instantiated
-        clone.parent = firePoint; //parent the clone to a firepoint
+        Instantiate(BulletTrailPrefab, firePoint.position, firePoint.rotation);
+        Transform clone = Instantiate(MuzzleFlashPrefab, firePoint.position, firePoint.rotation) as Transform;
+        clone.parent = firePoint;
         float size = Random.Range(0.6f, 0.9f);
         clone.localScale = new Vector3(size, size, size);
-        //Display for 1 single frame = yield return 0;
-        //yield return 0; //Requires function to be an IEnumerator //Waits a single frame
-        //Destroy(clone);
-        Destroy(clone.gameObject, 0.02f); //Must destroy the actual game object
-        //Display for multiple frames = 
+        Destroy(clone.gameObject, 0.02f);
     }
 }

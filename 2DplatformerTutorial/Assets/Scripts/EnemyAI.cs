@@ -32,26 +32,54 @@ public class EnemyAI : MonoBehaviour {
 
     //Waypoint we are currently moving towards
     private int currentWayPoint = 0;
-    
+
+    private bool searchingForPlayer = false;
+
+
     void Start ()
     {
         seeker = GetComponent<Seeker>();
         rb = GetComponent<Rigidbody2D>();
         if(target == null)
         {
-            Debug.LogError("No Player found PANIC");
+            if(!searchingForPlayer) //If not searching for player
+            {
+                searchingForPlayer = true;
+                StartCoroutine(SearchingForPlayer());
+            }
             return;
         }
 
         StartCoroutine(UpdatePath());
 	}
 
+    IEnumerator SearchingForPlayer()
+    {
+        GameObject sResult = GameObject.FindGameObjectWithTag("Player");
+        if(sResult == null) //If havent found anything, search after .5 seconds
+        {
+            yield return new WaitForSeconds(0.5f);
+            StartCoroutine(SearchingForPlayer());
+        }
+        else
+        {
+            target = sResult.transform;
+            searchingForPlayer = false;
+            StartCoroutine(UpdatePath());
+            yield return false;
+        }
+    }
+
     IEnumerator UpdatePath()
     {
-        if(target == null)
+        if (target == null)
         {
-            //TODO: Insert player search here
-            yield return false ;
+            if (!searchingForPlayer) //If not searching for player
+            {
+                searchingForPlayer = true;
+                StartCoroutine(SearchingForPlayer());
+            }
+            yield break;
         }
 
         seeker.StartPath(transform.position, target.position, OnPathComplete);
@@ -71,13 +99,18 @@ public class EnemyAI : MonoBehaviour {
 
     private void FixedUpdate()
     {
-        if(target == null)
+        if (target == null)
         {
+            if (!searchingForPlayer) //If not searching for player
+            {
+                searchingForPlayer = true;
+                StartCoroutine(SearchingForPlayer());
+            }
             return;
         }
 
         //TODO: Always look at player?
-        if(path == null)
+        if (path == null)
         {
             return;
         }
